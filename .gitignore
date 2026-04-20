@@ -1,0 +1,32 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git/
+.ipynb_checkpoints
+.idea/
+.vscode/
+
+# Ignore PyTorch checkpoints and models
+*.pt
+*.pth
+*.ckpt
+
+# Do NOT ignore the results folder itself, but ignore any temporary data
+# We want to keep plots and summaries
+!results/
+data/
