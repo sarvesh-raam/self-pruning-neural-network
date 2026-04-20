@@ -1,4 +1,4 @@
-# ✂️ Self-Pruning Neural Network
+# Self-Pruning Neural Network
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=flat&logo=PyTorch&logoColor=white)](https://pytorch.org/)
@@ -6,13 +6,13 @@
 
 A PyTorch implementation of dynamic weight pruning via learnable sigmoid gates. Built as a case study for the **Tredence AI Engineering** role.
 
-## 🧠 Overview
+## Overview
 
 In standard pruning, a model is trained completely, and then the smallest weights are removed (post-training pruning). 
 
 This project implements a **Self-Pruning Network**. Instead of pruning after the fact, the network has a built-in mechanism to identify and dynamically remove its own weakest connections *during* the training process. This is achieved by pairing every standard weight with a learnable "gate" parameter and applying a strict L1 sparsity penalty.
 
-## 🏗️ Architecture
+## Architecture
 
 ```text
        Input Image
@@ -27,7 +27,7 @@ This project implements a **Self-Pruning Network**. Instead of pruning after the
 │  (gates) ─┘                 │
 │                             │
 │  gate_scores (learned)      │
-│  → 0 means pruned ✂️        │
+│  → 0 means pruned           │
 └─────────────────────────────┘
             │
             ▼
@@ -40,7 +40,7 @@ This project implements a **Self-Pruning Network**. Instead of pruning after the
     Predictions (10 classes)
 ```
 
-## 📐 The Mathematical Formulation
+## The Mathematical Formulation
 
 ### Why L1 Penalty on Sigmoid Gates Causes Sparsity
 
@@ -58,7 +58,7 @@ Where:
 1. **The Corner Solution:** Unlike L2 regularization (which shrinks all weights proportionally), the L1 norm penalizes all non-zero values equally. The optimizer's "cheapest" move to minimize the loss is to push small gates *all the way to exactly 0*, creating a bimodal distribution.
 2. **The Analogy:** Think of the L1 penalty like taxing every employee equally regardless of their salary. The lowest-paid workers (unimportant weights) get laid off entirely (pruned), while only the high-value employees survive the cut.
 
-## 📊 Results: The Sparsity vs. Accuracy Tradeoff
+## Results: The Sparsity vs. Accuracy Tradeoff
 
 As we increase the penalty ($\lambda$), the network sacrifices classification accuracy in exchange for massive parameter reduction.
 
@@ -70,7 +70,7 @@ As we increase the penalty ($\lambda$), the network sacrifices classification ac
 | **0.001** (Medium) | ~49.88%       | 68.15%         |
 | **0.01** (High)    | ~41.20%       | 89.42%         |
 
-## 🚀 How to Run
+## How to Run
 
 1. **Clone the repository:**
    ```bash
@@ -89,7 +89,7 @@ As we increase the penalty ($\lambda$), the network sacrifices classification ac
    ```
    *This will run the training loop for 3 different $\lambda$ values and save all plots and models to the `results/` directory.*
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 self-pruning-nn/
@@ -107,7 +107,7 @@ self-pruning-nn/
 └── README.md
 ```
 
-## 🔮 What I Would Add With More Time
+## What I Would Add With More Time
 
 If given more time to expand this project, I would implement:
 1. **Prunable Convolutional Layers**: Extending the mechanism from `nn.Linear` to `nn.Conv2d` to prune entire feature maps.
