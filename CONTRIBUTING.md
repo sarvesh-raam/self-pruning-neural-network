@@ -28,7 +28,9 @@ Have an idea for a cool new feature? (e.g., Structured Pruning, Gradual Pruning 
 git clone https://github.com/sarvesh-raam/self-pruning-neural-network.git
 cd self-pruning-neural-network
 pip install -r requirements.txt
-python main.py --epochs 1 --batch_size 16 --device cpu
+python -m pytest -q tests                 # fast, synthetic data, no download
+python main.py --epochs 2 --lambda_val 1e-5   # quick real run on CIFAR-10
+python app.py                             # local demo at http://127.0.0.1:7860
 ```
 
 Thank you!

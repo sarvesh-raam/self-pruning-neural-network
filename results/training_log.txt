@@ -1,0 +1,131 @@
+───────────────────────── Self-Pruning Neural Network ─────────────────────────
+                Configuration                 
+┌──────────────────────┬─────────────────────┐
+│ Parameter            │ Value               │
+├──────────────────────┼─────────────────────┤
+│ Lambdas              │ 1e-06, 1e-05, 5e-05 │
+│ Epochs               │ 30                  │
+│ Batch size           │ 256                 │
+│ LR (weights / gates) │ 0.001 / 0.05        │
+│ Prune threshold      │ 0.01                │
+│ Device               │ cpu                 │
+└──────────────────────┴─────────────────────┘
+
+============================================================
+Experiment: lambda = 1e-06
+============================================================
+Training 30 epochs | lambda = 1e-06 | device = cpu
+Epoch 01/30 | CE 1.8431 | mean gate 0.6029 | acc 41.72% | sparsity 0.00%
+Epoch 02/30 | CE 1.6690 | mean gate 0.2622 | acc 45.60% | sparsity 11.39%
+Epoch 03/30 | CE 1.5866 | mean gate 0.1563 | acc 48.45% | sparsity 30.07%
+Epoch 04/30 | CE 1.5437 | mean gate 0.1198 | acc 50.04% | sparsity 42.99%
+Epoch 05/30 | CE 1.5005 | mean gate 0.1006 | acc 51.18% | sparsity 52.50%
+Epoch 06/30 | CE 1.4620 | mean gate 0.0887 | acc 52.63% | sparsity 59.47%
+Epoch 07/30 | CE 1.4409 | mean gate 0.0805 | acc 52.60% | sparsity 64.60%
+Epoch 08/30 | CE 1.4302 | mean gate 0.0746 | acc 52.73% | sparsity 68.50%
+Epoch 09/30 | CE 1.4116 | mean gate 0.0702 | acc 53.49% | sparsity 71.50%
+Epoch 10/30 | CE 1.3924 | mean gate 0.0667 | acc 54.20% | sparsity 73.88%
+Epoch 11/30 | CE 1.3657 | mean gate 0.0639 | acc 54.96% | sparsity 75.77%
+Epoch 12/30 | CE 1.3591 | mean gate 0.0616 | acc 55.25% | sparsity 77.33%
+Epoch 13/30 | CE 1.3500 | mean gate 0.0597 | acc 55.79% | sparsity 78.59%
+Epoch 14/30 | CE 1.3434 | mean gate 0.0582 | acc 55.55% | sparsity 79.65%
+Epoch 15/30 | CE 1.3351 | mean gate 0.0569 | acc 56.20% | sparsity 80.54%
+Epoch 16/30 | CE 1.3301 | mean gate 0.0558 | acc 56.08% | sparsity 81.30%
+Epoch 17/30 | CE 1.3189 | mean gate 0.0549 | acc 55.74% | sparsity 81.93%
+Epoch 18/30 | CE 1.3254 | mean gate 0.0541 | acc 56.51% | sparsity 82.43%
+Epoch 19/30 | CE 1.3077 | mean gate 0.0535 | acc 56.63% | sparsity 82.89%
+Epoch 20/30 | CE 1.3068 | mean gate 0.0529 | acc 56.66% | sparsity 83.27%
+Epoch 21/30 | CE 1.2977 | mean gate 0.0525 | acc 56.84% | sparsity 83.58%
+Epoch 22/30 | CE 1.3029 | mean gate 0.0521 | acc 56.95% | sparsity 83.83%
+Epoch 23/30 | CE 1.2928 | mean gate 0.0518 | acc 57.05% | sparsity 84.04%
+Epoch 24/30 | CE 1.2861 | mean gate 0.0516 | acc 57.04% | sparsity 84.20%
+Epoch 25/30 | CE 1.2830 | mean gate 0.0514 | acc 57.38% | sparsity 84.32%
+Epoch 26/30 | CE 1.2941 | mean gate 0.0513 | acc 57.14% | sparsity 84.41%
+Epoch 27/30 | CE 1.2813 | mean gate 0.0512 | acc 57.30% | sparsity 84.47%
+Epoch 28/30 | CE 1.2878 | mean gate 0.0512 | acc 57.40% | sparsity 84.50%
+Epoch 29/30 | CE 1.2747 | mean gate 0.0512 | acc 57.40% | sparsity 84.52%
+Epoch 30/30 | CE 1.2814 | mean gate 0.0511 | acc 57.40% | sparsity 84.52%
+lambda = 1e-06: accuracy 57.42% (before hard prune 57.40%), sparsity 84.52%, 6.5x fewer weights
+
+============================================================
+Experiment: lambda = 1e-05
+============================================================
+Training 30 epochs | lambda = 1e-05 | device = cpu
+Epoch 01/30 | CE 1.8564 | mean gate 0.2815 | acc 41.38% | sparsity 0.00%
+Epoch 02/30 | CE 1.6965 | mean gate 0.0377 | acc 45.22% | sparsity 78.17%
+Epoch 03/30 | CE 1.6326 | mean gate 0.0190 | acc 46.39% | sparsity 88.10%
+Epoch 04/30 | CE 1.6015 | mean gate 0.0138 | acc 47.40% | sparsity 91.79%
+Epoch 05/30 | CE 1.5774 | mean gate 0.0113 | acc 48.87% | sparsity 93.77%
+Epoch 06/30 | CE 1.5503 | mean gate 0.0098 | acc 49.49% | sparsity 94.96%
+Epoch 07/30 | CE 1.5482 | mean gate 0.0089 | acc 49.78% | sparsity 95.72%
+Epoch 08/30 | CE 1.5375 | mean gate 0.0082 | acc 49.57% | sparsity 96.25%
+Epoch 09/30 | CE 1.5325 | mean gate 0.0077 | acc 49.69% | sparsity 96.63%
+Epoch 10/30 | CE 1.5096 | mean gate 0.0073 | acc 50.74% | sparsity 96.93%
+Epoch 11/30 | CE 1.4966 | mean gate 0.0070 | acc 51.44% | sparsity 97.16%
+Epoch 12/30 | CE 1.4879 | mean gate 0.0068 | acc 51.25% | sparsity 97.34%
+Epoch 13/30 | CE 1.4839 | mean gate 0.0065 | acc 51.62% | sparsity 97.49%
+Epoch 14/30 | CE 1.4817 | mean gate 0.0064 | acc 51.61% | sparsity 97.61%
+Epoch 15/30 | CE 1.4776 | mean gate 0.0062 | acc 51.72% | sparsity 97.72%
+Epoch 16/30 | CE 1.4703 | mean gate 0.0061 | acc 52.11% | sparsity 97.80%
+Epoch 17/30 | CE 1.4610 | mean gate 0.0060 | acc 51.63% | sparsity 97.87%
+Epoch 18/30 | CE 1.4727 | mean gate 0.0060 | acc 52.16% | sparsity 97.92%
+Epoch 19/30 | CE 1.4546 | mean gate 0.0059 | acc 52.44% | sparsity 97.96%
+Epoch 20/30 | CE 1.4625 | mean gate 0.0058 | acc 52.41% | sparsity 98.00%
+Epoch 21/30 | CE 1.4502 | mean gate 0.0058 | acc 52.77% | sparsity 98.03%
+Epoch 22/30 | CE 1.4534 | mean gate 0.0057 | acc 52.61% | sparsity 98.05%
+Epoch 23/30 | CE 1.4465 | mean gate 0.0057 | acc 52.82% | sparsity 98.07%
+Epoch 24/30 | CE 1.4407 | mean gate 0.0057 | acc 53.08% | sparsity 98.08%
+Epoch 25/30 | CE 1.4382 | mean gate 0.0057 | acc 53.05% | sparsity 98.10%
+Epoch 26/30 | CE 1.4474 | mean gate 0.0056 | acc 53.02% | sparsity 98.10%
+Epoch 27/30 | CE 1.4428 | mean gate 0.0056 | acc 53.07% | sparsity 98.11%
+Epoch 28/30 | CE 1.4463 | mean gate 0.0056 | acc 52.93% | sparsity 98.11%
+Epoch 29/30 | CE 1.4360 | mean gate 0.0056 | acc 53.05% | sparsity 98.11%
+Epoch 30/30 | CE 1.4406 | mean gate 0.0056 | acc 53.02% | sparsity 98.11%
+lambda = 1e-05: accuracy 53.10% (before hard prune 53.02%), sparsity 98.11%, 53.0x fewer weights
+
+============================================================
+Experiment: lambda = 5e-05
+============================================================
+Training 30 epochs | lambda = 5e-05 | device = cpu
+Epoch 01/30 | CE 1.9074 | mean gate 0.2316 | acc 36.64% | sparsity 0.00%
+Epoch 02/30 | CE 1.8197 | mean gate 0.0132 | acc 38.99% | sparsity 96.32%
+Epoch 03/30 | CE 1.7703 | mean gate 0.0053 | acc 40.81% | sparsity 98.29%
+Epoch 04/30 | CE 1.7411 | mean gate 0.0036 | acc 42.34% | sparsity 98.86%
+Epoch 05/30 | CE 1.7251 | mean gate 0.0028 | acc 42.67% | sparsity 99.11%
+Epoch 06/30 | CE 1.7017 | mean gate 0.0023 | acc 44.11% | sparsity 99.24%
+Epoch 07/30 | CE 1.7015 | mean gate 0.0021 | acc 44.77% | sparsity 99.32%
+Epoch 08/30 | CE 1.6933 | mean gate 0.0019 | acc 44.47% | sparsity 99.38%
+Epoch 09/30 | CE 1.6902 | mean gate 0.0017 | acc 44.50% | sparsity 99.41%
+Epoch 10/30 | CE 1.6751 | mean gate 0.0016 | acc 45.25% | sparsity 99.44%
+Epoch 11/30 | CE 1.6636 | mean gate 0.0016 | acc 45.38% | sparsity 99.46%
+Epoch 12/30 | CE 1.6594 | mean gate 0.0015 | acc 45.49% | sparsity 99.48%
+Epoch 13/30 | CE 1.6544 | mean gate 0.0014 | acc 45.18% | sparsity 99.50%
+Epoch 14/30 | CE 1.6517 | mean gate 0.0014 | acc 45.52% | sparsity 99.51%
+Epoch 15/30 | CE 1.6488 | mean gate 0.0014 | acc 45.81% | sparsity 99.52%
+Epoch 16/30 | CE 1.6457 | mean gate 0.0013 | acc 45.74% | sparsity 99.53%
+Epoch 17/30 | CE 1.6397 | mean gate 0.0013 | acc 46.04% | sparsity 99.54%
+Epoch 18/30 | CE 1.6479 | mean gate 0.0013 | acc 46.58% | sparsity 99.54%
+Epoch 19/30 | CE 1.6347 | mean gate 0.0013 | acc 46.40% | sparsity 99.54%
+Epoch 20/30 | CE 1.6407 | mean gate 0.0012 | acc 46.51% | sparsity 99.55%
+Epoch 21/30 | CE 1.6304 | mean gate 0.0012 | acc 46.85% | sparsity 99.55%
+Epoch 22/30 | CE 1.6347 | mean gate 0.0012 | acc 46.52% | sparsity 99.55%
+Epoch 23/30 | CE 1.6293 | mean gate 0.0012 | acc 46.80% | sparsity 99.55%
+Epoch 24/30 | CE 1.6199 | mean gate 0.0012 | acc 46.98% | sparsity 99.55%
+Epoch 25/30 | CE 1.6222 | mean gate 0.0012 | acc 47.04% | sparsity 99.56%
+Epoch 26/30 | CE 1.6317 | mean gate 0.0012 | acc 47.01% | sparsity 99.56%
+Epoch 27/30 | CE 1.6260 | mean gate 0.0012 | acc 46.91% | sparsity 99.56%
+Epoch 28/30 | CE 1.6286 | mean gate 0.0012 | acc 46.81% | sparsity 99.56%
+Epoch 29/30 | CE 1.6200 | mean gate 0.0012 | acc 46.86% | sparsity 99.56%
+Epoch 30/30 | CE 1.6208 | mean gate 0.0012 | acc 46.87% | sparsity 99.56%
+lambda = 5e-05: accuracy 47.11% (before hard prune 46.87%), sparsity 99.56%, 226.5x fewer weights
+
+All experiments finished.
+
+| Lambda | Test Accuracy | Sparsity Level (%) | Weights kept | Compact model size |
+|--------|---------------|--------------------|--------------|--------------------|
+| 1e-06 | 57.42% | 84.52% | 269,027 / 1,737,984 | 1.62 MB |
+| 1e-05 | 53.10% | 98.11% | 32,795 / 1,737,984 | 0.20 MB |
+| 5e-05 | 47.11% | 99.56% | 7,674 / 1,737,984 | 0.05 MB |
+
+Best accuracy: λ = 1e-06. Accuracy is measured after hard pruning (every gate below the threshold set to exactly 0).
+

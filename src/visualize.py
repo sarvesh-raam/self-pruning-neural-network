@@ -1,116 +1,99 @@
 import os
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
-import torch
 from typing import Dict, List
+
+import matplotlib
+matplotlib.use("Agg")  # headless: works on servers, CI and Spaces
+import matplotlib.pyplot as plt
+import numpy as np
+
 from .model import SelfPruningNet
 
-# Set the style for publication-quality plots
-plt.style.use('seaborn-v0_8-whitegrid')
-sns.set_context("paper", font_scale=1.5)
+plt.rcParams.update({
+    "figure.dpi": 110, "savefig.dpi": 150, "font.size": 11,
+    "axes.spines.top": False, "axes.spines.right": False, "axes.grid": True, "grid.alpha": 0.3,
+})
+ACCENT, SECOND, PRUNED = "#2563eb", "#f97316", "#dc2626"
 
-def plot_gate_distribution(model: SelfPruningNet, lambda_val: float, save_path: str) -> None:
-    """Plots a histogram of all gate values in the network."""
-    all_gates = model.get_all_gates().cpu().numpy()
-    
-    plt.figure(figsize=(10, 6))
-    sns.histplot(all_gates, bins=50, kde=False, color='steelblue')
-    
-    plt.title(f'Gate Value Distribution (λ = {lambda_val})', fontsize=18, pad=20)
-    plt.xlabel('Gate Value (Sigmoid Output)', fontsize=14)
-    plt.ylabel('Count (Number of Weights)', fontsize=14)
-    
-    # Annotate the "pruned" spike at 0
-    plt.axvline(x=0.01, color='red', linestyle='--', alpha=0.7)
-    plt.text(0.02, plt.ylim()[1]*0.9, 'Pruned (Gates ≈ 0)', color='red', fontsize=12)
-    
-    plt.tight_layout()
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    plt.close()
+
+def _save(fig: plt.Figure, save_path: str) -> None:
+    os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
+    fig.savefig(save_path, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_gate_distribution(model: SelfPruningNet, lambda_val: float, save_path: str,
+                           threshold: float = 1e-2) -> None:
+    """
+    Histogram of every gate value in the network.
+
+    The y-axis is logarithmic: a successful run has a spike of hundreds of
+    thousands of gates at 0 and a much smaller cluster of surviving gates, and on
+    a linear axis the survivors would be invisible.
+    """
+    gates = model.get_all_gates().cpu().numpy()
+    pruned = (gates < threshold).mean() * 100
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.hist(gates, bins=100, range=(0, 1), color=ACCENT, log=True)
+    ax.axvline(threshold, color=PRUNED, linestyle="--", linewidth=1.2)
+    ax.text(threshold + 0.015, 0.95, f"threshold {threshold:g}\n{pruned:.1f}% pruned",
+            color=PRUNED, transform=ax.get_xaxis_transform(), va="top")
+    ax.set_title(f"Final gate values (λ = {lambda_val:g})")
+    ax.set_xlabel("gate value  sigmoid(gate_score)")
+    ax.set_ylabel("number of weights (log scale)")
+    _save(fig, save_path)
+
 
 def plot_training_curves(history: Dict[str, List[float]], lambda_val: float, save_path: str) -> None:
-    """Plots training curves: losses, accuracy, and sparsity over epochs."""
-    epochs = range(1, len(history['accuracy']) + 1)
-    
-    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(20, 6))
-    
-    # Plot 1: Losses
-    ax1.plot(epochs, history['class_loss'], label='Classification Loss', color='blue', linewidth=2)
-    ax1.plot(epochs, history['sparsity_loss'], label='Sparsity Loss', color='green', linewidth=2)
-    ax1.set_title(f'Training Losses (λ = {lambda_val})', fontsize=16)
-    ax1.set_xlabel('Epoch', fontsize=14)
-    ax1.set_ylabel('Loss', fontsize=14)
-    ax1.legend()
-    
-    # Plot 2: Accuracy
-    ax2.plot(epochs, history['accuracy'], label='Test Accuracy', color='purple', linewidth=2)
-    ax2.set_title('Test Accuracy over Time', fontsize=16)
-    ax2.set_xlabel('Epoch', fontsize=14)
-    ax2.set_ylabel('Accuracy (%)', fontsize=14)
-    ax2.set_ylim([0, 100])
-    
-    # Plot 3: Sparsity
-    ax3.plot(epochs, history['sparsity'], label='Network Sparsity', color='orange', linewidth=2)
-    ax3.set_title('Network Sparsity over Time', fontsize=16)
-    ax3.set_xlabel('Epoch', fontsize=14)
-    ax3.set_ylabel('Sparsity (%)', fontsize=14)
-    ax3.set_ylim([0, 100])
-    
-    plt.tight_layout()
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    plt.close()
+    """Classification loss, test accuracy and sparsity per epoch."""
+    epochs = np.arange(1, len(history["accuracy"]) + 1)
+    fig, axes = plt.subplots(1, 3, figsize=(16, 4.5))
+
+    axes[0].plot(epochs, history["class_loss"], color=ACCENT, linewidth=2)
+    axes[0].set_title("Cross-entropy loss (train)")
+    axes[1].plot(epochs, history["accuracy"], color=ACCENT, linewidth=2)
+    axes[1].set_title("Test accuracy (%)")
+    axes[2].plot(epochs, history["sparsity"], color=SECOND, linewidth=2)
+    axes[2].set_title("Sparsity (% of gates < threshold)")
+    axes[2].set_ylim(0, 100)
+    for ax in axes:
+        ax.set_xlabel("epoch")
+    fig.suptitle(f"Training dynamics, λ = {lambda_val:g}", y=1.02)
+    _save(fig, save_path)
+
 
 def plot_lambda_comparison(all_results: List[Dict], save_path: str) -> None:
-    """Plots a bar chart comparing accuracy vs sparsity across lambda values."""
-    lambdas = [str(r['lambda']) for r in all_results]
-    accuracies = [r['accuracy'] for r in all_results]
-    sparsities = [r['sparsity'] for r in all_results]
-    
-    x = np.arange(len(lambdas))
-    width = 0.35
-    
-    fig, ax1 = plt.subplots(figsize=(10, 6))
-    
-    color1 = 'purple'
-    ax1.set_xlabel('Lambda (λ) Penalty', fontsize=14)
-    ax1.set_ylabel('Test Accuracy (%)', color=color1, fontsize=14)
-    bars1 = ax1.bar(x - width/2, accuracies, width, label='Accuracy', color=color1, alpha=0.7)
-    ax1.tick_params(axis='y', labelcolor=color1)
-    ax1.set_ylim([0, 100])
-    
-    ax2 = ax1.twinx()
-    color2 = 'orange'
-    ax2.set_ylabel('Sparsity (%)', color=color2, fontsize=14)
-    bars2 = ax2.bar(x + width/2, sparsities, width, label='Sparsity', color=color2, alpha=0.7)
-    ax2.tick_params(axis='y', labelcolor=color2)
-    ax2.set_ylim([0, 100])
-    
-    ax1.set_xticks(x)
-    ax1.set_xticklabels(lambdas)
-    plt.title('Sparsity vs Accuracy Trade-off across Lambdas', fontsize=18, pad=20)
-    
-    fig.tight_layout()
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    plt.close()
+    """Accuracy vs sparsity for each lambda: the trade-off curve."""
+    sparsity = [r["sparsity"] for r in all_results]
+    accuracy = [r["accuracy"] for r in all_results]
 
-def plot_layer_sparsity_heatmap(model: SelfPruningNet, save_path: str) -> None:
-    """Plots a heatmap showing the sparsity level of each PrunableLinear layer."""
-    layer_sparsity = model.get_layer_sparsity()
-    
-    names = list(layer_sparsity.keys())
-    values = np.array(list(layer_sparsity.values())).reshape(1, -1)
-    
-    plt.figure(figsize=(10, 4))
-    sns.heatmap(values, annot=True, cmap='YlOrRd', fmt='.1f',
-                xticklabels=names, yticklabels=['Sparsity %'], cbar=False)
-    
-    plt.title('Sparsity Distribution Across Layers', fontsize=16, pad=15)
-    plt.tight_layout()
-    
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    plt.savefig(save_path, dpi=300, bbox_inches='tight')
-    plt.close()
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(sparsity, accuracy, color=ACCENT, linewidth=1.5, marker="o", markersize=9)
+    for r in all_results:
+        ax.annotate(f"λ = {r['lambda']:g}\n{r['compression']:.0f}x smaller",
+                    (r["sparsity"], r["accuracy"]), textcoords="offset points", xytext=(8, 8))
+    ax.set_xlabel("sparsity (% of weights pruned)")
+    ax.set_ylabel("test accuracy after hard pruning (%)")
+    ax.set_title("Sparsity vs accuracy trade-off")
+    ax.set_xlim(min(sparsity) - 5, 100)
+    ax.set_ylim(min(accuracy) - 5, max(accuracy) + 5)
+    _save(fig, save_path)
+
+
+def plot_layer_sparsity_heatmap(all_results: List[Dict], save_path: str) -> None:
+    """Rows = lambda, columns = layer, cell = % of that layer's weights pruned."""
+    layers = list(all_results[0]["layer_sparsity"].keys())
+    values = np.array([[r["layer_sparsity"][name] for name in layers] for r in all_results])
+
+    fig, ax = plt.subplots(figsize=(8, 1.2 + 0.7 * len(all_results)))
+    im = ax.imshow(values, cmap="YlOrRd", vmin=0, vmax=100, aspect="auto")
+    ax.set_xticks(range(len(layers)), labels=layers)
+    ax.set_yticks(range(len(all_results)), labels=[f"λ = {r['lambda']:g}" for r in all_results])
+    ax.grid(False)
+    for i in range(values.shape[0]):
+        for j in range(values.shape[1]):
+            ax.text(j, i, f"{values[i, j]:.1f}%", ha="center", va="center",
+                    color="white" if values[i, j] > 60 else "black")
+    fig.colorbar(im, ax=ax, label="% pruned")
+    ax.set_title("Sparsity per layer")
+    _save(fig, save_path)

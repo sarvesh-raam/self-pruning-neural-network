@@ -1,32 +1,25 @@
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
+*.py[cod]
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/
-.ipynb_checkpoints
+venv/
+env/
+.ipynb_checkpoints/
+.pytest_cache/
 .idea/
 .vscode/
+*.log
 
-# Ignore PyTorch checkpoints and models
-*.pt
+# Dataset (downloaded automatically by torchvision)
+data/
+
+# Full training checkpoints are large; the compact sparse models in models/ are committed
 *.pth
 *.ckpt
 
-# Do NOT ignore the results folder itself, but ignore any temporary data
-# We want to keep plots and summaries
-!results/
-data/
+# Local archives / scratch
+*.rar
+*.zip
+results_unrar/
+
+# Private case-study brief
+case_study.txt

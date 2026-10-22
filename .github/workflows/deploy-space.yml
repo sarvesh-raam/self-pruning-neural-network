@@ -1,0 +1,24 @@
+name: Deploy demo to Hugging Face Spaces
+
+# Runs when the demo or the exported models change. Needs two repository settings:
+#   Settings > Secrets > Actions:   HF_TOKEN  (a Hugging Face token with write access)
+#   Settings > Variables > Actions: HF_SPACE  (e.g. your-hf-username/self-pruning-neural-network)
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths: [ "app.py", "src/**", "models/**", "results/**", "assets/**", "scripts/deploy_space.py" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ vars.HF_SPACE != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install huggingface_hub
+      - run: python scripts/deploy_space.py --space "${{ vars.HF_SPACE }}"
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}

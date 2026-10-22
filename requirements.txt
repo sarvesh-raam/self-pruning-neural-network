@@ -1,7 +1,8 @@
-torch
-torchvision
-matplotlib
-seaborn
-numpy
-tqdm
-rich
+torch>=2.2
+torchvision>=0.17
+numpy>=1.24
+matplotlib>=3.7
+rich>=13
+pytest>=7
+gradio>=5,<6
+huggingface_hub>=0.25
