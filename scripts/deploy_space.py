@@ -1,17 +1,20 @@
 """
-Publish the Gradio demo to a Hugging Face Space.
+Publish the demo to a Hugging Face Space.
 
     pip install huggingface_hub
-    hf auth login                     # or set HF_TOKEN
+    python -c "from huggingface_hub import login; login()"     # or set HF_TOKEN
     python scripts/deploy_space.py --space <your-hf-username>/self-pruning-neural-network
 
-Only what the demo needs is uploaded: app.py, the inference modules, the compact
-sparse models, the result figures and a few example images. Training code and
-the dataset stay out of the Space.
+By default this deploys the static site in web/ (the model runs in the visitor's
+browser), which is free on every Hugging Face account. `--gradio` deploys the
+Python app.py instead, which Hugging Face only hosts for PRO accounts.
+Training code and the dataset never leave your machine.
 """
 import argparse
 import os
 import shutil
+import subprocess
+import sys
 import tempfile
 
 from huggingface_hub import HfApi
@@ -34,6 +37,19 @@ short_description: A CIFAR-10 network that learned to prune its own weights
 Live demo for [self-pruning-neural-network](https://github.com/sarvesh-raam/self-pruning-neural-network).
 """
 
+STATIC_README = """---
+title: Self-Pruning Neural Network
+emoji: ✂️
+colorFrom: blue
+colorTo: indigo
+sdk: static
+app_file: index.html
+pinned: false
+license: mit
+short_description: A CIFAR-10 network that pruned 98% of its own weights
+---
+"""
+
 SPACE_REQUIREMENTS = """--extra-index-url https://download.pytorch.org/whl/cpu
 torch
 numpy
@@ -44,7 +60,15 @@ FILES = ["app.py", "src/__init__.py", "src/model.py", "src/prunable_layer.py", "
 DIRS = {"models": (".pt",), "assets/examples": (".png",), "results": (".png", ".json")}
 
 
-def stage(target: str, gradio_version: str) -> None:
+def stage_static(target: str) -> None:
+    # Re-export so the site always matches the models in models/
+    subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "export_web.py")], check=True)
+    shutil.copytree(os.path.join(ROOT, "web"), target, dirs_exist_ok=True)
+    with open(os.path.join(target, "README.md"), "w", encoding="utf-8") as f:
+        f.write(STATIC_README)
+
+
+def stage_gradio(target: str, gradio_version: str) -> None:
     for rel in FILES:
         os.makedirs(os.path.dirname(os.path.join(target, rel)) or target, exist_ok=True)
         shutil.copy2(os.path.join(ROOT, rel), os.path.join(target, rel))
@@ -65,6 +89,7 @@ def stage(target: str, gradio_version: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--space", required=True, help="<hf-username>/<space-name>")
+    parser.add_argument("--gradio", action="store_true", help="Deploy the Gradio app (needs Hugging Face PRO)")
     parser.add_argument("--gradio_version", default="5.50.0")
     args = parser.parse_args()
 
@@ -72,13 +97,16 @@ def main() -> None:
         raise SystemExit("No models in models/. Run `python main.py --run_all` first.")
 
     api = HfApi(token=os.environ.get("HF_TOKEN"))
-    api.create_repo(args.space, repo_type="space", space_sdk="gradio", exist_ok=True)
+    api.create_repo(args.space, repo_type="space", space_sdk="gradio" if args.gradio else "static", exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
-        stage(tmp, args.gradio_version)
+        if args.gradio:
+            stage_gradio(tmp, args.gradio_version)
+        else:
+            stage_static(tmp)
         api.upload_folder(folder_path=tmp, repo_id=args.space, repo_type="space",
                           commit_message="Deploy demo from GitHub",
                           # remove stale files from earlier deploys, but keep the Space's .gitattributes
-                          delete_patterns=["*.py", "*.pt", "*.png", "*.json", "*.md", "*.txt", "LICENSE"])
+                          delete_patterns=["*.py", "*.pt", "*.bin", "*.png", "*.json", "*.md", "*.txt", "*.html", "*.js", "LICENSE"])
     print(f"Deployed: https://huggingface.co/spaces/{args.space}")
 
 

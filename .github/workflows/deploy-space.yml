@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
-    paths: [ "app.py", "src/**", "models/**", "results/**", "assets/**", "scripts/deploy_space.py" ]
+    paths: [ "web/**", "models/**", "results/**", "assets/**", "scripts/deploy_space.py", "scripts/export_web.py" ]
 
 jobs:
   deploy:
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install huggingface_hub
+      - run: pip install huggingface_hub numpy torch --extra-index-url https://download.pytorch.org/whl/cpu
       - run: python scripts/deploy_space.py --space "${{ vars.HF_SPACE }}"
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}

@@ -9,7 +9,8 @@ Every weight has a learnable sigmoid gate, and an L1 penalty on the gates pushes
 The result is a network with **98% of its weights removed that still reaches 53% test accuracy**,
 stored in a 0.2 MB file instead of 7 MB.
 
-**Live demo:** *(add your Hugging Face Space link here after deploying, see [Hosting](#hosting-the-demo))*
+**[Live demo](https://sarveshraam-self-pruning-neural-network.static.hf.space/)**: the pruned models run entirely in your browser
+(plain JavaScript, no server), classifying an image in under a millisecond.
 
 ## Results
 
@@ -128,8 +129,9 @@ sparse model to `models/`.
 │   └── visualize.py        # all plots
 ├── experiments/run_all.py  # λ sweep, summary table, comparison plots
 ├── tests/                  # gradient flow, pruning, export round-trip, end-to-end sparsity
-├── app.py                  # Gradio demo
-├── scripts/                # Hugging Face deploy, demo example images
+├── web/                    # static in-browser demo (index.html, sparse inference in model.js)
+├── app.py                  # Gradio version of the demo
+├── scripts/                # web export, Hugging Face deploy, demo example images
 ├── models/                 # compact pruned models used by the demo
 ├── results/                # plots, results.json, training log
 ├── notebooks/analysis.ipynb
@@ -138,16 +140,22 @@ sparse model to `models/`.
 
 ## Hosting the demo
 
-The demo in [app.py](app.py) runs on a free CPU Hugging Face Space and needs only the compact models.
+The [live demo](https://huggingface.co/spaces/sarveshraam/self-pruning-neural-network) is a static
+Hugging Face Space, free on any account. [scripts/export_web.py](scripts/export_web.py) converts each
+compact model into a small binary file (int32 index + float32 value per kept weight), and
+[web/model.js](web/model.js) runs the sparse forward pass in the browser, visiting only the surviving
+connections. Its logits match PyTorch to within 3e-6.
 
 ```bash
-pip install huggingface_hub
-hf auth login          # paste a token with write access
+python -c "from huggingface_hub import login; login()"   # paste a write token
 python scripts/deploy_space.py --space <your-hf-username>/self-pruning-neural-network
 ```
 
-To redeploy automatically on every push, add the `HF_TOKEN` secret and an `HF_SPACE` variable to the GitHub
-repository (Settings → Secrets and variables → Actions). See [.github/workflows/deploy-space.yml](.github/workflows/deploy-space.yml).
+To redeploy automatically when the models or site change, add an `HF_TOKEN` secret and an `HF_SPACE`
+variable to the GitHub repository (Settings → Secrets and variables → Actions). See
+[.github/workflows/deploy-space.yml](.github/workflows/deploy-space.yml).
+`python app.py` runs the same demo as a local Gradio app; `--gradio` deploys that version, but Hugging Face
+only hosts Gradio Spaces on PRO accounts.
 
 ## Limitations and next steps
 

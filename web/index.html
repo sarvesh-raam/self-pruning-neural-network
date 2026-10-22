@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-Pruning Neural Network</title>
+<meta name="description" content="A CIFAR-10 network that learned to delete 98% of its own weights, running entirely in your browser.">
+<style>
+  :root {
+    --bg: #f7f8fa; --surface: #ffffff; --text: #111827; --muted: #5b6474; --border: #e3e6ec;
+    --accent: #2563eb; --accent-soft: #dbe6fd; --bar: #2563eb; --bar-track: #eef1f6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e1116; --surface: #161b22; --text: #e6e9ef; --muted: #9aa4b2; --border: #2a313c;
+      --accent: #6b9bff; --accent-soft: #1c2a45; --bar: #6b9bff; --bar-track: #222a35;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 40px 16px 64px; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.02em; }
+  h2 { font-size: 1.35rem; margin: 48px 0 12px; letter-spacing: -0.01em; }
+  p { margin: 0 0 12px; }
+  a { color: var(--accent); }
+  .lede { color: var(--muted); font-size: 1.1rem; max-width: 680px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 24px 0 0; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 1.6rem; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .stat span { color: var(--muted); font-size: 0.9rem; }
+
+  .demo { display: grid; grid-template-columns: minmax(240px, 320px) 1fr; gap: 20px; align-items: start; }
+  .demo > * { min-width: 0; }
+  @media (max-width: 760px) { .demo { grid-template-columns: 1fr; } }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
+  .drop { border: 2px dashed var(--border); border-radius: 12px; padding: 14px; text-align: center; cursor: pointer;
+          transition: border-color .15s, background .15s; }
+  .drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+  .drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #preview { width: 100%; aspect-ratio: 1; image-rendering: pixelated; border-radius: 8px; background: var(--bar-track); display: block; }
+  .drop small { display: block; color: var(--muted); margin-top: 8px; }
+  .examples { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 12px; }
+  .examples button { padding: 0; border: 2px solid transparent; border-radius: 6px; background: none; cursor: pointer; line-height: 0; }
+  .examples button:hover, .examples button:focus-visible { border-color: var(--accent); outline: none; }
+  .examples img { width: 100%; border-radius: 4px; image-rendering: pixelated; }
+  .hint { color: var(--muted); font-size: 0.85rem; margin: 10px 0 0; }
+
+  .models { display: grid; gap: 12px; }
+  .model h3 { margin: 0; font-size: 1rem; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .model h3 small { color: var(--muted); font-weight: 400; font-variant-numeric: tabular-nums; }
+  .meta { color: var(--muted); font-size: 0.85rem; margin: 2px 0 10px; font-variant-numeric: tabular-nums; }
+  .row { display: grid; grid-template-columns: 92px 1fr 52px; gap: 8px; align-items: center; font-size: 0.92rem; margin: 4px 0; }
+  .track { height: 10px; background: var(--bar-track); border-radius: 5px; overflow: hidden; }
+  .fill { height: 100%; background: var(--bar); border-radius: 5px; width: 0; transition: width .3s ease; }
+  .row:not(:first-of-type) .fill { opacity: 0.45; }
+  .pct { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .empty { color: var(--muted); font-size: 0.92rem; }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  th { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  .figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px; }
+  .figure { margin: 0; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 8px; }
+  .figure img { width: 100%; display: block; }
+  .figure figcaption { color: #5b6474; font-size: 0.85rem; padding: 6px 4px 2px; }
+  .prose { max-width: 720px; }
+  code { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 0.9em; background: var(--bar-track); padding: 1px 5px; border-radius: 4px; }
+  footer { margin-top: 56px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Self-Pruning Neural Network</h1>
+    <p class="lede">A CIFAR-10 classifier that learned to delete most of its own weights while it trained.
+      The pruned models are small enough to run right here in your browser, with no server involved.</p>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <section>
+    <h2>Try it</h2>
+    <div class="demo">
+      <div class="panel">
+        <div class="drop" id="drop" tabindex="0" role="button" aria-label="Upload an image">
+          <canvas id="preview" width="32" height="32" aria-label="What the network sees (32 by 32 pixels)"></canvas>
+          <small>Click or drop an image. The network sees it at 32×32.</small>
+        </div>
+        <input type="file" id="file" accept="image/*" hidden>
+        <div class="examples" id="examples"></div>
+        <p class="hint">Or pick a CIFAR-10 test image. Categories: airplane, car, bird, cat, deer, dog, frog, horse, ship, truck.</p>
+      </div>
+      <div class="models" id="models"><p class="empty">Loading models…</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Results</h2>
+    <p class="prose">Each model was trained for 30 epochs with a different penalty strength λ. Accuracy is measured on the
+      10,000 CIFAR-10 test images <em>after</em> every gate below 0.01 was set to exactly zero, so it is the accuracy of the truly sparse network.</p>
+    <div class="table-wrap"><table id="table"></table></div>
+    <div class="figures">
+      <figure class="figure"><img src="img/gates_dist.png" alt="Histogram of gate values: a huge spike at 0 and a small cluster near 1" loading="lazy">
+        <figcaption>Final gate values: a spike at 0 (pruned) and a cluster near 1 (kept).</figcaption></figure>
+      <figure class="figure"><img src="img/lambda_comparison.png" alt="Accuracy falls as sparsity rises across the three lambda values" loading="lazy">
+        <figcaption>Higher λ removes more weights at some cost in accuracy.</figcaption></figure>
+      <figure class="figure"><img src="img/layer_sparsity.png" alt="Heatmap of sparsity per layer for each lambda" loading="lazy">
+        <figcaption>The 3072-input first layer is pruned hardest; the output layer least.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="prose">
+    <h2>How it works</h2>
+    <p>Every weight <code>w</code> is multiplied by a learnable gate <code>g = sigmoid(s)</code> between 0 and 1. Training minimises
+      cross-entropy plus <code>λ · Σ g</code>, the L1 norm of all gates.</p>
+    <p>The L1 penalty pulls every gate towards zero with the same steady force, however small the gate already is.
+      A connection survives only if it helps the classification more than that pull costs. Most raw-pixel connections don't,
+      so they close completely, and the network ends up using a few percent of its original weights.</p>
+    <p>Making this work needed three things: a higher learning rate for the gates (Adam moves each parameter only about
+      <code>lr</code> per step), no BatchNorm after gated layers (it would silently undo uniform gate shrinkage), and hard-pruning
+      before measuring accuracy.</p>
+  </section>
+
+  <footer>
+    Code, training details and tests: <a href="https://github.com/sarvesh-raam/self-pruning-neural-network">github.com/sarvesh-raam/self-pruning-neural-network</a>
+  </footer>
+</main>
+
+<script src="model.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

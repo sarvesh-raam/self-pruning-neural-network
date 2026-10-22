@@ -1,0 +1,175 @@
+{
+ "models": [
+  {
+   "file": "models/lambda_1e-06.bin",
+   "bytes": 2155840,
+   "layers": [
+    {
+     "name": "fc1",
+     "shape": [
+      512,
+      3072
+     ],
+     "nnz": 171221,
+     "index_offset": 0,
+     "value_offset": 684884,
+     "bias_offset": 1369768
+    },
+    {
+     "name": "fc2",
+     "shape": [
+      256,
+      512
+     ],
+     "nnz": 74472,
+     "index_offset": 1371816,
+     "value_offset": 1669704,
+     "bias_offset": 1967592
+    },
+    {
+     "name": "fc3",
+     "shape": [
+      128,
+      256
+     ],
+     "nnz": 22146,
+     "index_offset": 1968616,
+     "value_offset": 2057200,
+     "bias_offset": 2145784
+    },
+    {
+     "name": "fc4",
+     "shape": [
+      10,
+      128
+     ],
+     "nnz": 1188,
+     "index_offset": 2146296,
+     "value_offset": 2151048,
+     "bias_offset": 2155800
+    }
+   ],
+   "lambda": 1e-06,
+   "accuracy": 57.42,
+   "accuracy_soft": 57.4,
+   "sparsity": 84.52074527740479,
+   "weights_total": 1737984,
+   "weights_remaining": 269027,
+   "compression": 6.460258635750315
+  },
+  {
+   "file": "models/lambda_1e-05.bin",
+   "bytes": 265984,
+   "layers": [
+    {
+     "name": "fc1",
+     "shape": [
+      512,
+      3072
+     ],
+     "nnz": 19633,
+     "index_offset": 0,
+     "value_offset": 78532,
+     "bias_offset": 157064
+    },
+    {
+     "name": "fc2",
+     "shape": [
+      256,
+      512
+     ],
+     "nnz": 6967,
+     "index_offset": 159112,
+     "value_offset": 186980,
+     "bias_offset": 214848
+    },
+    {
+     "name": "fc3",
+     "shape": [
+      128,
+      256
+     ],
+     "nnz": 5213,
+     "index_offset": 215872,
+     "value_offset": 236724,
+     "bias_offset": 257576
+    },
+    {
+     "name": "fc4",
+     "shape": [
+      10,
+      128
+     ],
+     "nnz": 982,
+     "index_offset": 258088,
+     "value_offset": 262016,
+     "bias_offset": 265944
+    }
+   ],
+   "lambda": 1e-05,
+   "accuracy": 53.1,
+   "accuracy_soft": 53.02,
+   "sparsity": 98.11304211616516,
+   "weights_total": 1737984,
+   "weights_remaining": 32795,
+   "compression": 52.99539563957921
+  },
+  {
+   "file": "models/lambda_5e-05.bin",
+   "bytes": 65016,
+   "layers": [
+    {
+     "name": "fc1",
+     "shape": [
+      512,
+      3072
+     ],
+     "nnz": 5536,
+     "index_offset": 0,
+     "value_offset": 22144,
+     "bias_offset": 44288
+    },
+    {
+     "name": "fc2",
+     "shape": [
+      256,
+      512
+     ],
+     "nnz": 763,
+     "index_offset": 46336,
+     "value_offset": 49388,
+     "bias_offset": 52440
+    },
+    {
+     "name": "fc3",
+     "shape": [
+      128,
+      256
+     ],
+     "nnz": 812,
+     "index_offset": 53464,
+     "value_offset": 56712,
+     "bias_offset": 59960
+    },
+    {
+     "name": "fc4",
+     "shape": [
+      10,
+      128
+     ],
+     "nnz": 563,
+     "index_offset": 60472,
+     "value_offset": 62724,
+     "bias_offset": 64976
+    }
+   ],
+   "lambda": 5e-05,
+   "accuracy": 47.11,
+   "accuracy_soft": 46.87,
+   "sparsity": 99.55845475196838,
+   "weights_total": 1737984,
+   "weights_remaining": 7674,
+   "compression": 226.4769351055512
+  }
+ ]
+}
